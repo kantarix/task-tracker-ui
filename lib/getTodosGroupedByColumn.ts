@@ -9,21 +9,49 @@ export const getTodosGroupedByColumn = async () => {
 
     const columns = todos.reduce((acc, todo) => {
         if (!acc.get(todo.state)) {
-            acc.set(todo.id, {
+            acc.set(todo.state, {
                 id: todo.state,
                 todos: []
             })
         }
 
-        acc.get(todo.id)!.todos.push({
+        acc.get(todo.state)!.todos.push({
             $id: todo.$id,
             $createdAt: todo.$createdAt,
             name: todo.name,
+            description: todo.description,
             state: todo.state
             // ...acc(json.image && { image: JSON.parse(json.image) })
         })
-        console.log(acc);
+        
         return acc;
 
     }, new Map<TypedColumn, Column>)
+
+    // if columns doesn't have inprogress, todo and done, add them with empty todos
+    const columnTypes: TypedColumn[] = ["TODO", "IN_PROGRESS", "DONE"];
+    
+    for (const columnType of columnTypes) {
+        if(!columns.get(columnType)) {
+            columns.set(columnType, {
+                id: columnType,
+                todos: [],
+            })
+        }
+    }
+
+    // sort columns by columnTypes
+
+    const sortedColumns = new Map(
+        Array.from(columns.entries()).sort(
+            (a, b) => columnTypes.indexOf(a[0]) - columnTypes.indexOf(b[0])
+        )
+    );
+
+    const board: Board = {
+        columns: sortedColumns
+    };
+
+    return board;
+
 };
