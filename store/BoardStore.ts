@@ -6,16 +6,30 @@ interface BoardState {
     getBoard: () => void;
     setBoardState: (board: Board) => void;
     updateTodoInDB: (todo: Todo, columnId: TypedColumn) => void;
+    newTaskNameInput: string;
+    newTaskDescInput: string;
+    newTaskType: TypedColumn;
 
     searchString: string;
     setSearchString: (searchString: string) => void;
+
+    addTask: (todoName: string, todoDesc: string, columnId: TypedColumn) => void;
+    deleteTask: (taskIndex: number, todoId: Todo, id: TypedColumn) => void;
+
+    setNewTaskNameInput: (input: string) => void;
+    setNewTaskDescInput: (input: string) => void;
+    setNewTaskType: (columnId: TypedColumn) => void;
 }
 
-export const useBoardStore = create<BoardState>((set) => ({
+export const useBoardStore = create<BoardState>((set, get) => ({
   board: {
     columns: new Map<TypedColumn, Column>()
   },
   searchString: "",
+  newTaskNameInput: "",
+  newTaskDescInput: "",
+  newTaskType: "TODO",
+
   setSearchString: (searchString) => set ({ searchString }),
 
   getBoard: async () => {
@@ -24,6 +38,24 @@ export const useBoardStore = create<BoardState>((set) => ({
   },
 
   setBoardState: (board) => set({ board }),
+
+  deleteTask: async (taskIndex: number, todo: Todo, id: TypedColumn) => {
+    const newColumns = new Map(get().board.columns);
+    
+    newColumns.get(id)?.todos.splice(taskIndex, 1);
+
+    set({ board: { columns: newColumns } });
+
+    const res = await fetch("http://localhost:8080/api/tasks/" + todo.id, {
+      method: 'DELETE',
+    });
+  },
+
+  setNewTaskNameInput: (input: string) => set({ newTaskNameInput: input }),
+
+  setNewTaskDescInput: (input: string) => set({ newTaskDescInput: input }),
+
+  setNewTaskType: (columnId: TypedColumn) => set({ newTaskType: columnId }),
 
   updateTodoInDB: async(todo, columnId) => {
     var url = new URL("http://localhost:8080/api/tasks");
@@ -36,4 +68,51 @@ export const useBoardStore = create<BoardState>((set) => ({
       method: 'PUT',
     })
   },
+
+  addTask: async (todoName: string, todoDesc: string, columnId: TypedColumn) => {
+    var url = new URL("http://localhost:8080/api/tasks");
+    url.searchParams.set('name', todoName);
+    url.searchParams.set('description', todoDesc);
+    url.searchParams.set('state', columnId);
+
+    const res = await fetch(url.toString(), {
+      method: 'PUT',
+    });
+
+    const todo = await res.json();
+    const id = todo.id;
+    const createdAt = todo.created_at;
+
+    set({ newTaskNameInput: "" });
+    set({ newTaskDescInput: "" });
+
+    set((state) => {
+      const newColumns = new Map(state.board.columns);
+      const newTodo: Todo = {
+        id: id,
+        created_at: createdAt,
+        name: todoName,
+        description: todoDesc,
+        state: columnId,
+      };
+
+      const column = newColumns.get(columnId);
+
+      if (!column) {
+        newColumns.set(columnId, {
+          id: columnId,
+          todos: [newTodo],
+        });
+      } else {
+        newColumns.get(columnId)?.todos.push(newTodo);
+      }
+
+      return {
+        board: {
+          columns: newColumns,
+        }
+      }
+    })
+  },
+
 }))
