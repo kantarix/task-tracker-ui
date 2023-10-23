@@ -13,7 +13,7 @@ interface Todo {
     id: string;
     created_at: Date;
     name: string;
-    description: String;
+    description: string;
     state: TypedColumn;
     // image?: string;
 }
