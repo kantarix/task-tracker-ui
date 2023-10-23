@@ -45,8 +45,8 @@ function Column({id, todos, index}: Props) {
                             <div className="space-y-2">
                                 {todos.map((todo, index) => (
                                     <Draggable
-                                        key={todo.$id}
-                                        draggableId={todo.$id}
+                                        key={todo.id}
+                                        draggableId={todo.id}
                                         index={index}
                                     >
                                         {(provided) => (
@@ -77,7 +77,7 @@ function Column({id, todos, index}: Props) {
             </div>
         )}
     </Draggable>
-  )
+  );
 }
 
 export default Column

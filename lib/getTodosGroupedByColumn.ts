@@ -16,8 +16,8 @@ export const getTodosGroupedByColumn = async () => {
         }
 
         acc.get(todo.state)!.todos.push({
-            $id: todo.$id,
-            $createdAt: todo.$createdAt,
+            id: todo.id.toString(),
+            created_at: todo.created_at,
             name: todo.name,
             description: todo.description,
             state: todo.state
@@ -47,6 +47,8 @@ export const getTodosGroupedByColumn = async () => {
             (a, b) => columnTypes.indexOf(a[0]) - columnTypes.indexOf(b[0])
         )
     );
+
+    console.log(sortedColumns);
 
     const board: Board = {
         columns: sortedColumns

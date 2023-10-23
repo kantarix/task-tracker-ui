@@ -10,8 +10,8 @@ interface Column {
 }
 
 interface Todo {
-    $id: string;
-    $createdAt: string;
+    id: string;
+    created_at: Date;
     name: string;
     description: String;
     state: TypedColumn;
