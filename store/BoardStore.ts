@@ -6,6 +6,7 @@ interface BoardState {
     getBoard: () => void;
     setBoardState: (board: Board) => void;
     updateTodoInDB: (todo: Todo, columnId: TypedColumn) => void;
+    taskId: number;
     newTaskNameInput: string;
     newTaskDescInput: string;
     newTaskType: TypedColumn;
@@ -16,6 +17,7 @@ interface BoardState {
     addTask: (todoName: string, todoDesc: string, columnId: TypedColumn) => void;
     deleteTask: (taskIndex: number, todoId: Todo, id: TypedColumn) => void;
 
+    setTaskId: (input: number) => void;
     setNewTaskNameInput: (input: string) => void;
     setNewTaskDescInput: (input: string) => void;
     setNewTaskType: (columnId: TypedColumn) => void;
@@ -29,6 +31,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   newTaskNameInput: "",
   newTaskDescInput: "",
   newTaskType: "TODO",
+  taskId: -1,
 
   setSearchString: (searchString) => set ({ searchString }),
 
@@ -51,6 +54,8 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     });
   },
 
+  setTaskId: (input: number) => set({ taskId: input }),
+
   setNewTaskNameInput: (input: string) => set({ newTaskNameInput: input }),
 
   setNewTaskDescInput: (input: string) => set({ newTaskDescInput: input }),
@@ -58,6 +63,10 @@ export const useBoardStore = create<BoardState>((set, get) => ({
   setNewTaskType: (columnId: TypedColumn) => set({ newTaskType: columnId }),
 
   updateTodoInDB: async(todo, columnId) => {
+    set({ newTaskNameInput: "" });
+    set({ newTaskDescInput: "" });
+    set({ taskId: -1 });
+
     var url = new URL("http://localhost:8080/api/tasks");
     url.searchParams.set('task_id', todo.id);
     url.searchParams.set('name', todo.name);
@@ -66,6 +75,30 @@ export const useBoardStore = create<BoardState>((set, get) => ({
 
     const res = await fetch(url.toString(), {
       method: 'PUT',
+    })
+
+    set((state) => {
+      const newColumns = new Map(state.board.columns);
+      const newTodo: Todo = {
+        id: todo.id,
+        created_at: new Date(),
+        name: todo.name,
+        description: todo.description,
+        state: columnId,
+      };
+
+      let todoEdit = newColumns.get(columnId)?.todos.find(todo => todo.id === newTodo.id);
+      if (todoEdit) {
+        todoEdit.name = newTodo.name;
+        todoEdit.description = newTodo.description;
+        todoEdit.state = newTodo.state;
+      }
+      
+      return {
+        board: {
+          columns: newColumns,
+        }
+      }
     })
   },
 
@@ -85,6 +118,7 @@ export const useBoardStore = create<BoardState>((set, get) => ({
 
     set({ newTaskNameInput: "" });
     set({ newTaskDescInput: "" });
+    set({ taskId: -1 });
 
     set((state) => {
       const newColumns = new Map(state.board.columns);

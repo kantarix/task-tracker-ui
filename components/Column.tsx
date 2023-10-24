@@ -19,10 +19,19 @@ const idToColumnText: {
 }
 
 function Column({id, todos, index}: Props) {
-    const [searchString, setNewTaskType] = useBoardStore((state) => [state.searchString, state.setNewTaskType]);
+    const [searchString, setNewTaskType, setTaskId, setNewTaskNameInput, setNewTaskDescInput] = useBoardStore((state) => [
+        state.searchString, 
+        state.setNewTaskType,
+        state.setTaskId,
+        state.setNewTaskNameInput,
+        state.setNewTaskDescInput,
+    ]);
     const openModal = useModalStore((state) => state.openModal);
 
     const handleAddTodo = () => {
+        setTaskId(-1);
+        setNewTaskNameInput("");
+        setNewTaskDescInput("");
         setNewTaskType(id);
         openModal();
     }

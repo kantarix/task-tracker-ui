@@ -15,10 +15,4 @@ interface Todo {
     name: string;
     description: string;
     state: TypedColumn;
-    // image?: string;
 }
-
-// interface Image {
-//     bucketId: string;
-//     fileId: string;
-// }

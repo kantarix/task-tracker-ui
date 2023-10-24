@@ -6,14 +6,15 @@ import { useBoardStore } from '@/store/BoardStore';
 import TaskTypeRadioGroup from './TaskTypeRadioGroup';
 
 function Modal() {
-    const [addTask, newTaskNameInput, setNewTaskNameInput, newTaskDescInput, setNewTaskDescInput, newTaskType, setNewTaskType] = useBoardStore((state) => [
+    const [addTask, newTaskNameInput, setNewTaskNameInput, newTaskDescInput, setNewTaskDescInput, newTaskType, taskId, updateTodoInDB] = useBoardStore((state) => [
         state.addTask,
         state.newTaskNameInput,
         state.setNewTaskNameInput,
         state.newTaskDescInput,
         state.setNewTaskDescInput,
         state.newTaskType,
-        state.setNewTaskType,
+        state.taskId,
+        state.updateTodoInDB,
     ]);
 
     const [isOpen, closeModal] = useModalStore((state) => [
@@ -25,13 +26,23 @@ function Modal() {
         e.preventDefault();
         if (!newTaskNameInput) return;
 
-        addTask(newTaskNameInput, newTaskDescInput, newTaskType);
+        if (taskId != -1) {
+            updateTodoInDB({
+                id: taskId.toString(),
+                created_at: new Date(),
+                name: newTaskNameInput,
+                description: newTaskDescInput,
+                state: newTaskType
+            }, newTaskType);
+        } else {
+            addTask(newTaskNameInput, newTaskDescInput, newTaskType);
+        }
 
+        
         closeModal();
     }
 
   return (
-    // Use the `Transition` component at the root level
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="form" onSubmit={handleSubmit} className="relative z-10" onClose={closeModal}>
         <Transition.Child
@@ -62,29 +73,31 @@ function Modal() {
                             as="h3"
                             className="text-lg font-medium leading-6 text-gray-900 pb-2"
                         >
-                            Add a Task
+                            Task
                         </Dialog.Title>
 
-                    <div className="mt-2">
-                        <input 
-                            type="text"
-                            value={newTaskNameInput}
-                            onChange={(e) => setNewTaskNameInput(e.target.value)}
-                            placeholder="Enter task name here..."
-                            className="w-full border border-gray-300 rounded-md outline-none p-5"
-                        />
-                    </div>
-                    <div className="mt-2">
-                        <input 
-                            type="text"
-                            value={newTaskDescInput}
-                            onChange={(e) => setNewTaskDescInput(e.target.value)}
-                            placeholder="Enter task description here..."
-                            className="w-full border border-gray-300 rounded-md outline-none p-5"
-                        />
+                    <div className='w-full py-2'>
+                        <div className="mt-2">
+                            <input 
+                                type="text"
+                                value={newTaskNameInput}
+                                onChange={(e) => setNewTaskNameInput(e.target.value)}
+                                placeholder="Enter task name here..."
+                                className="w-full border border-gray-300 rounded-md outline-none p-5"
+                            />
+                        </div>
+                        <div className="mt-2">
+                            <input 
+                                type="text"
+                                value={newTaskDescInput}
+                                onChange={(e) => setNewTaskDescInput(e.target.value)}
+                                placeholder="Enter task description here..."
+                                className="w-full border border-gray-300 rounded-md outline-none p-5 font-thin"
+                            />
+                        </div>
                     </div>
 
-                    <TaskTypeRadioGroup />
+                    {taskId === -1 ? <TaskTypeRadioGroup /> : null }
 
                     <div>
                         <button
@@ -95,7 +108,7 @@ function Modal() {
                             focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:bg-gray-100 disabled:text-gray-300
                             disabled:cursor-not-allowed"
                         >
-                            Add Task
+                            Save Task
                         </button>
                     </div>
                     </Dialog.Panel>
