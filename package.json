@@ -11,13 +11,21 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.291.0",
     "next": "13.5.5",
+    "radix-ui": "^1.0.1",
     "react": "^18",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18",
+    "react-hook-form": "^7.47.0",
+    "tailwind-merge": "^1.14.0",
+    "zod": "^3.22.4",
     "zustand": "^4.4.3"
   },
   "devDependencies": {
+    "@hookform/resolvers": "^3.3.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-beautiful-dnd": "^13.1.5",
