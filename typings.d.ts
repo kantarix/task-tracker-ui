@@ -16,3 +16,11 @@ interface Todo {
     description: string;
     state: TypedColumn;
 }
+
+interface User {
+    id: string;
+    created_at: Date;
+    username: string;
+    email: string;
+    password: string;
+}

@@ -16,7 +16,7 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 
 const FormSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Invalid email'),
+  username: z.string().min(1, 'Username is required').max(100),
   password: z
     .string()
     .min(1, 'Password is required')
@@ -27,27 +27,44 @@ const SignInForm = () => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    var url = new URL("http://localhost:8080/session");
+
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: values.username,
+        password: values.password
+      }),
+    });
+
+    if(res.ok) {
+      router.push('/');
+    } else {
+      console.error('Login failed');
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
         <div className='space-y-2'>
-          <FormField
+        <FormField
             control={form.control}
-            name='email'
+            name='username'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input placeholder='mail@example.com' {...field} />
+                  <Input placeholder='johndoe' {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
